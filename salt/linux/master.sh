@@ -1,6 +1,6 @@
 #!/bin/sh
 
-FINALIZE=$(echo $1 | tr '[:upper:]' '[:lower:]')
+POST_PROVISION=$(echo $1 | tr '[:upper:]' '[:lower:]')
 INSTALL_MINION=$(echo $2 | tr '[:upper:]' '[:lower:]')
 MASTER_IP=$3
 USERNAME=$4
@@ -29,9 +29,9 @@ autosign_minion()
 	  --data "{\"client\": \"local\", \"tgt\": \"saltmaster\", \"fun\": \"cmd.run\", \"arg\":\"touch /etc/salt/pki/master/minions_autosign/${MINION_ID}\"}"
 }
 
-if [ "$FINALIZE" = "true" ]
+if [ "$POST_PROVISION" = "true" ]
 then
-	sh ./Ubuntu_PP.sh >>/tmp/fjcmp_pp.log 2>&1 &
+	sh ./linux-arm-script.sh >>/tmp/fjcmp_pp.log 2>&1 &
 fi
 
 if [ "$INSTALL_MINION" = "true" ]
