@@ -1,0 +1,56 @@
+{
+  "eu-west-1": {
+    "ubuntu-20.04": {
+      "creationDate": "2020-05-26T10:04:37.000Z",
+      "ami": "ami-002bfd0ab45e7af56",
+      "name": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-arm64-server-20200522"
+    },
+    "ubuntu-18.04": {
+      "creationDate": "2020-05-26T09:25:33.000Z",
+      "ami": "ami-08a68f4324ed33a51",
+      "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-arm64-server-20200521"
+    },
+    "windows-2016": {
+      "creationDate": "2020-05-13T19:52:00.000Z",
+      "ami": "ami-0b252704976970860",
+      "name": "Windows_Server-2016-English-Core-Base-2020.05.13"
+    },
+    "windows-2019": {
+      "creationDate": "2020-05-13T19:24:34.000Z",
+      "ami": "ami-008125063ab94866e",
+      "name": "Windows_Server-2019-English-Core-Base-2020.05.13"
+    },
+    "ubuntu-16.04": {
+      "creationDate": "2020-05-26T09:06:36.000Z",
+      "ami": "ami-0bdabc5ea3c4a0420",
+      "name": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-arm64-server-20200521"
+    }
+  },
+  "eu-west-2": {
+    "ubuntu-20.04": {
+      "creationDate": "2020-05-26T10:04:37.000Z",
+      "ami": "ami-0a34675ec0aed1b10",
+      "name": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-arm64-server-20200522"
+    },
+    "ubuntu-18.04": {
+      "creationDate": "2020-05-26T09:25:33.000Z",
+      "ami": "ami-09cb5d36edfe093d3",
+      "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-arm64-server-20200521"
+    },
+    "windows-2016": {
+      "creationDate": "2020-05-13T19:52:12.000Z",
+      "ami": "ami-0f6db3ef170c47f19",
+      "name": "Windows_Server-2016-English-Core-Base-2020.05.13"
+    },
+    "windows-2019": {
+      "creationDate": "2020-05-13T19:24:41.000Z",
+      "ami": "ami-05ffbee76b83415b0",
+      "name": "Windows_Server-2019-English-Core-Base-2020.05.13"
+    },
+    "ubuntu-16.04": {
+      "creationDate": "2020-05-26T09:06:37.000Z",
+      "ami": "ami-034f03b67d4c87f21",
+      "name": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-arm64-server-20200521"
+    }
+  }
+}
