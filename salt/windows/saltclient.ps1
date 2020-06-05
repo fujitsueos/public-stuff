@@ -102,12 +102,14 @@ class SaltClient {
     }
 
     [string] installApp([string]$minionId, [string]$appName){
+        $decodedApp = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($appName))
+        
         $url = $this.endpoint + "/minions" 
         $payload = @{
             client= "local"
             tgt= $minionId
             fun= "pkg.install"
-            arg= $appName
+            arg= $decodedApp
         }
 
         [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
