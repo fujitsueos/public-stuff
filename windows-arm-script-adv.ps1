@@ -35,9 +35,9 @@ $ErrorActionPreference = "SilentlyContinue"
 function Invoke-InstallZabbixAgent {
   [CmdletBinding()]
   param (
-    [Parameter(mandatory)]
+    [Parameter()]
     [PSCredential]$Credentials,
-    [Parameter(mandatory)]
+    [Parameter()]
     [string]$ZabbixHost
   )
 
@@ -59,7 +59,7 @@ function Invoke-InstallZabbixAgent {
 function Install-AntivirusAgent {
   [CmdletBinding()]
   param (
-    [Parameter(mandatory)]
+    [Parameter()]
     [string]$Version
   )
   $path = 'C:\av'
