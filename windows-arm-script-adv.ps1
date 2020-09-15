@@ -32,6 +32,22 @@ param(
 # set errors to silent
 $ErrorActionPreference = "SilentlyContinue"
 
+function ConvertFrom-Base64 {
+	[alias("fb64")]
+    [CmdletBinding()]
+    param(
+        [Parameter(
+        Position=0, 
+        Mandatory=$true, 
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true)
+        ]
+        [string]$Value
+    )
+
+    return [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Value))
+}
+
 function Invoke-InstallZabbixAgent {
   [CmdletBinding()]
   param (
