@@ -99,7 +99,7 @@ if ($AllowRemoteExecution -and $AllowRemoteExecution -ne "No" -and $AllowRemoteE
 }
 
 if ($ZabbixConfig -and $ZabbixConfig -ne " ") {
-  $ZabbixConfig | Set-Content "C:\ZabbixConfig.txt"
+  # $ZabbixConfig | Set-Content "C:\ZabbixConfig.txt"
   $ZabbixConfig = $ZabbixConfig | ConvertFrom-Base64 | ConvertFrom-Json
 
   $zabbixCredentials = New-Object System.Management.Automation.PSCredential(
