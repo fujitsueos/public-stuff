@@ -94,11 +94,11 @@ if ($InitDisk) {
   Invoke-InitDisks
 }
 
-if ($AllowRemoteExecution) {
+if ($AllowRemoteExecution -and $AllowRemoteExecution -ne "No" -and $AllowRemoteExecution -ne " ") {
   Enable-PSRemoting
 }
 
-if ($ZabbixConfig) {
+if ($ZabbixConfig -and $ZabbixConfig -ne " ") {
   $ZabbixConfig | Set-Content "C:\ZabbixConfig.txt"
   $ZabbixConfig = $ZabbixConfig | ConvertFrom-Base64 | ConvertFrom-Json
 
@@ -111,6 +111,6 @@ if ($ZabbixConfig) {
 
 }
 
-if ($AntiVirusAgentVersion) {
+if ($AntiVirusAgentVersion -and $AntiVirusAgentVersion -ne " ") {
   Install-AntivirusAgent -Version $AntiVirusAgentVersion
 }
