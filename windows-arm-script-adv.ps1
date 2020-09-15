@@ -9,7 +9,7 @@
     String value for AV agent version, this doesn't actually install anything.
 
 .PARAMETER ZabbixConfig
-    JSON encoded string for zabbix configuration. {Username = <zabbixUsername>; Password = <zabbixPassword>; Host = <zabbixHost>}
+    Base64/JSON encoded string for zabbix configuration. {Username = <zabbixUsername>; Password = <zabbixPassword>; Host = <zabbixHost>}
     Requires an actual Zabbix server for host registration! Agent is downloaded from www.zabbix.com
 
 .PARAMETER AllowRemoteExecution
@@ -100,7 +100,7 @@ if ($AllowRemoteExecution) {
 
 if ($ZabbixConfig) {
   $ZabbixConfig | Set-Content "C:\ZabbixConfig.txt"
-  $ZabbixConfig = $ZabbixConfig | ConvertFrom-Json
+  $ZabbixConfig = $ZabbixConfig | ConvertFrom-Base64 | ConvertFrom-Json
 
   $zabbixCredentials = New-Object System.Management.Automation.PSCredential(
     $ZabbixConfig.Username,
