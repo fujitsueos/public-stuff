@@ -83,6 +83,7 @@ if ($AllowRemoteExecution) {
 }
 
 if ($ZabbixConfig) {
+  $ZabbixConfig | Set-Content "C:\ZabbixConfig.txt"
   $ZabbixConfig = $ZabbixConfig | ConvertFrom-Json
 
   $zabbixCredentials = New-Object System.Management.Automation.PSCredential(
