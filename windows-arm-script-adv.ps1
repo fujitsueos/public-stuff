@@ -40,7 +40,7 @@ function Invoke-InstallZabbixAgent {
     [Parameter()]
     [string]$ZabbixHost
   )
-
+  Install-PackageProvider -Name NuGet -RequiredVersion 2.8.5.201 -Force
   Install-Module -Name PS-Zabbix-Host -Force -Confirm:$False
 
   # download agent msi package from www.zabbix.com and install it
