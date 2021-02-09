@@ -1,6 +1,7 @@
 param(
     [string]$vmname,
-    [string]$saltmaster,
+    [string]$salthostname,
+    [string]$salturl,
     [string]$minionversion,
     [string]$installminion,
     [string]$username,
@@ -11,7 +12,7 @@ param(
 )
 
 if($installminion -eq $True) {
-    .\bootstrap-salt.ps1 -minion $minionid -master $saltmaster -version $minionversion
+    .\bootstrap-salt.ps1 -minion $minionid -master $salthostname -version $minionversion
 
-    .\saltclient.ps1 -saltmaster $saltmaster -username $username -password $password -minionid $minionid -appnames $appnames
+    .\saltclient.ps1 -saltmaster $salturl -username $username -password $password -minionid $minionid -appnames $appnames
  }
