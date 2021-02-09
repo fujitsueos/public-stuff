@@ -26,7 +26,7 @@ class SaltClient {
     [string]$token = ""
 
     SaltClient([string]$e, [string]$u, [string]$p){
-        $this.endpoint = "https://$e"
+        $this.endpoint = $e
         $this.username = $u
         $this.password = $p
     }
