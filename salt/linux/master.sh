@@ -7,7 +7,6 @@ USERNAME=$4
 PASSWORD=$5
 MINION_ID=$6
 MINION_VERSION=$7
-APPNAMES=$8
 
 TOKEN=$(curl  --insecure --request POST \
   --url "${MASTER_URL}/login" \
@@ -32,27 +31,9 @@ autosign_minion()
 	  --data "{\"client\": \"local\", \"tgt\": \"saltmaster\", \"fun\": \"cmd.run\", \"arg\":\"touch /etc/salt/pki/master/minions_autosign/${MINION_ID}\"}"
 }
 
-install_applications()
-{
-	for i in $(echo $APPNAMES | sed "s/,/ /g")
-	do
-	    APPNAME=$(echo $i | base64 --decode)
-
-	    JID=$(curl  --insecure --request POST \
-		  --url "${MASTER_URL}/minions" \
-		  --header 'content-type: application/json' \
-		  --header "x-auth-token: ${TOKEN}" \
-		  --data "{\"client\": \"local\", \"tgt\": \"${MINION_ID}\", \"fun\": \"state.sls\", \"arg\":\"${APPNAME}\"}" | \
-		    python2 -c "import sys, json; print json.load(sys.stdin)['return'][0]['jid']")
-		sleep 30
-	done
-}
-
 if [ "$INSTALL_MINION" = "true" ]
 then
 	install_minion
 	sleep 10
 	autosign_minion
-	sleep 10
-	install_applications
 fi
