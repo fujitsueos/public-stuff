@@ -1,12 +1,14 @@
 param(
-    [string]$saltmaster,
-    [string]$username,
-    [string]$password,
-    [string]$minionid,
-    [String]$appnames
+  [string]$saltmaster,
+  [string]$username,
+  [string]$password,
+  [string]$minionid
 )
 
-add-type @"
+
+
+
+Add-Type @"
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
     public class TrustAllCertsPolicy : ICertificatePolicy {
@@ -19,139 +21,135 @@ add-type @"
 "@
 
 
-class SaltClient {
-    [string]$endpoint
-    [string]$username
-    [string]$password
-    [string]$token = ""
 
-    SaltClient([string]$e, [string]$u, [string]$p){
-        $this.endpoint = $e
-        $this.username = $u
-        $this.password = $p
-    }
+function Retry-Command {
+  [CmdletBinding()]
+  param(
+    [Parameter(Position = 0,Mandatory = $true)]
+    [scriptblock]$ScriptBlock,
 
-    [string] getToken(){
-        if([string]::IsNullOrEmpty($this.token) -eq $True){
-            $url = $this.endpoint + "/login"
-            $payload = @{
-                username = $this.username
-                password = $this.password
-                eauth = "pam"
-            }
+    [Parameter(Position = 1,Mandatory = $false)]
+    [int]$Maximum = 5,
 
-            [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-            $response = Invoke-RestMethod -Method Post -Uri $url -Body $payload
-            $this.token = $response.return.token
-        }
-        return $this.token
-    }
+    [Parameter(Position = 2,Mandatory = $false)]
+    [int]$Delay = 5,
 
-    [bool] minionExists([string]$minionId){
-        $url = $this.endpoint + "/keys"
+    [Parameter(Position = 3,Mandatory = $false)]
+    [string]$ErrorMessage = 'Execution failed.'
+  )
 
+  begin {
+    $cnt = 0
+  }
+
+  process {
+    do {
+      $cnt++
+      try {
+        $ScriptBlock.Invoke()
+        return
+      } catch {
+        Write-Output $_.Exception.InnerException.Message -ErrorAction Continue
+        Start-Sleep -Seconds $Delay
+      }
+    } while ($cnt -lt $Maximum)
+
+    throw $ErrorMessage
+  }
+}
+
+
+class SaltClient{
+  [string]$endpoint
+  [string]$username
+  [string]$password
+  [string]$token = ""
+
+  SaltClient ([string]$e,[string]$u,[string]$p) {
+    $this.endpoint = $e
+    $this.username = $u
+    $this.password = $p
+
+  }
+
+  [string] getToken () {
+    if ([string]::IsNullOrEmpty($this.token) -eq $True) {
+      $url = $this.endpoint + "/login"
+      $payload = @{
+        username = $this.username
+        password = $this.password
+        eauth = "pam"
+      }
+
+      $response = Retry-Command -ErrorMessage "Token request failed" -ScriptBlock {
         [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-        $response = Invoke-RestMethod -Method Get -Uri $url -Headers @{'X-Auth-Token'=$this.getToken()}
-        foreach ($minion in $response.return.minions_pre) {
-            if($minion -eq $minionId){
-                return $True
-            }
-        }
-        return $False
+        return Invoke-RestMethod -Method Post -Uri $url -Body $payload
+      }
+
+      $this.token = $response.return.token
+    }
+    return $this.token
+  }
+
+  [bool] minionExists ([string]$minionId) {
+    $url = $this.endpoint + "/keys"
+
+    $response = Retry-Command -ErrorMessage "Minion exists request failed" -ScriptBlock {
+      [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+      return Invoke-RestMethod -Method Get -Uri $url -Headers @{ 'X-Auth-Token' = $this.getToken() }
     }
 
-    [bool] autosignMinion([string]$minionId){
-        $minionArg = "touch /etc/salt/pki/master/minions_autosign/" + $minionId
-        $payload = @{
-            client= "local"
-            tgt= "saltmaster"
-            fun= "cmd.run"
-            arg= $minionArg
-        }
+    return $minionId -in $response.return.minions_pre
+  }
 
-        [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-        $response = Invoke-RestMethod -Method Post -Uri  $this.endpoint -Headers @{'X-Auth-Token'=$this.getToken()} -Body $payload
-        return $True
+  [bool] autosignMinion ([string]$minionId) {
+    $minionArg = "touch /etc/salt/pki/master/minions_autosign/" + $minionId
+    $payload = @{
+      client = "local"
+      tgt = "saltmaster"
+      fun = "cmd.run"
+      arg = $minionArg
     }
 
-    [bool] waitAndAutosignMinion([string]$minionId){
-        [int]$tries = 0
-        while($tries -lt 10) {
-            $exist = $this.minionExists($minionId)
-            if($exist) {
-                return $this.autosignMinion($minionId)
-            }
-            Start-Sleep -Seconds 10
-            $tries++
-        }
-        return $False
+    $response = Retry-Command -ErrorMessage "Autosign Minion request failed" -ScriptBlock {
+      [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+      return Invoke-RestMethod -Method Post -Uri $this.endpoint -Headers @{ 'X-Auth-Token' = $this.getToken() } -Body $payload
     }
 
-    [bool] refreshWindowsrepository([string]$minionId){
-        $minionArg = "salt-run winrepo.update_git_repos; salt $($minionId) pkg.refresh_db"
-        $payload = @{
-            client= "local"
-            tgt= "saltmaster"
-            fun= "cmd.run"
-            arg= $minionArg
-        }
+    return $True
+  }
 
-        [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-        $response = Invoke-RestMethod -Method Post -Uri  $this.endpoint -Headers @{'X-Auth-Token'=$this.getToken()} -Body $payload
-        return $True
+  [bool] waitAndAutosignMinion ([string]$minionId) {
+    [int]$tries = 0
+    while ($tries -lt 10) {
+      $exist = $this.minionExists($minionId)
+      if ($exist) {
+        return $this.autosignMinion($minionId)
+      }
+      Start-Sleep -Seconds 10
+      $tries++
+    }
+    return $False
+  }
+
+  [bool] refreshWindowsrepository ([string]$minionId) {
+    $minionArg = "salt-run winrepo.update_git_repos; salt $($minionId) pkg.refresh_db"
+    $payload = @{
+      client = "local"
+      tgt = "saltmaster"
+      fun = "cmd.run"
+      arg = $minionArg
     }
 
-    [string] installApp([string]$minionId, [string]$appName){
-        $decodedApp = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($appName))
-        
-        $url = $this.endpoint + "/minions" 
-        $payload = @{
-            client= "local"
-            tgt= $minionId
-            fun= "pkg.install"
-            arg= $decodedApp
-        }
-
-        [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-        $response = Invoke-RestMethod -Method Post -Uri  $url -Headers @{'X-Auth-Token'=$this.getToken()} -Body $payload
-        return $response.return.jid
+    $response = Retry-Command -ErrorMessage "Refresh Windows repository request failed" -ScriptBlock {
+      [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+      return Invoke-RestMethod -Method Post -Uri $this.endpoint -Headers @{ 'X-Auth-Token' = $this.getToken() } -Body $payload
     }
-
-    [bool] waitForJob([string]$appJid){
-        $url = $this.endpoint + "/jobs/$($appJid)"
-        [int]$tries = 0
-
-        while($tries -lt 20) {
-            [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
-            $response = Invoke-RestMethod -Method Get -Uri  $url -Headers @{'X-Auth-Token'=$this.getToken()}
-            if(![string]::IsNullOrEmpty($response.info.Result) -eq $True){
-                return $True
-            }
-            Start-Sleep -Seconds 10
-            $tries++
-        }
-
-        return $False
-    }
-
-    [bool] waitAndInstallApp([string]$minionId, [string]$appName){
-        $jobId = $this.installApp($minionId, $appName)
-        $this.waitForJob($jobId)
-        return $True
-    }
+    return $True
+  }
 
 }
 
-[SaltClient]$client = [SaltClient]::new($saltmaster, $username, $password)
+[SaltClient]$client = [SaltClient]::new($saltmaster,$username,$password)
 
 $client.waitAndAutosignMinion($minionid)
-$client.refreshWindowsrepository($minionid)
-
-foreach ($appName in $appnames.Split(",")) {
-
-    if(![string]::IsNullOrEmpty($appName) -eq $True){
-
-        Start-Sleep -Seconds 20
-        $client.waitAndInstallApp($minionid, $appName)
-    }
-}
