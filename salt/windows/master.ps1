@@ -10,7 +10,7 @@ param(
 )
 
 if ($installminion -eq $True) {
-  .\bootstrap-salt.ps1 -minion $minionid -master $salthostname -Version $minionversion
+  .\bootstrap-salt.ps1 -minion $minionid -master $salthostname -version $minionversion
 
   .\saltclient.ps1 -saltmaster $salturl -UserName $username -password $password -minionid $minionid
 }
