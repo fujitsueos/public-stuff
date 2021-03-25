@@ -8,7 +8,7 @@ param(
   [string]$minionid
 
 )
-$saltRepo = "https://archive.repo.saltproject.io/windows/"
+$saltRepo = "https://archive.repo.saltproject.io/windows"
 if ($installminion -eq $True) {
   .\bootstrap-salt.ps1 -repourl $saltRepo -minion $minionid -master $salthostname -version $minionversion
 
