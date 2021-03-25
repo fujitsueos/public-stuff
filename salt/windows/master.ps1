@@ -17,5 +17,6 @@ if ($installminion -eq $True) {
   }
   
   .\bootstrap-salt.ps1 -repourl $saltRepo -minion $minionid -master $salthostname -version $minionversion
+  
   .\saltclient.ps1 -saltmaster $salturl -UserName $username -password $password -minionid $minionid
 }
