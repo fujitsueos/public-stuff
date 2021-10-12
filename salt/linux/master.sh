@@ -20,7 +20,7 @@ autosign_minion()
 	  --url "${MASTER_URL}/login" \
 	  --header 'content-type: application/json' \
 	  --data "{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\", \"eauth\": \"pam\"}" | \
-	    python -c "import sys, json; print json.load(sys.stdin)['return'][0]['token']")
+	    python2 -c "import sys, json; print json.load(sys.stdin)['return'][0]['token']")
 
 	curl --retry 10 --insecure --request POST \
 	  --url "${MASTER_URL}/" \
