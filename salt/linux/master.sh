@@ -8,7 +8,7 @@ PASSWORD=$5
 MINION_ID=$6
 MINION_VERSION=$7
 
-TOKEN=$(curl  --insecure --request POST \
+TOKEN=$(curl --retry 10 --insecure --request POST \
   --url "${MASTER_URL}/login" \
   --header 'content-type: application/json' \
   --data "{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\", \"eauth\": \"pam\"}" | \
