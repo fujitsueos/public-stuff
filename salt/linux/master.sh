@@ -8,12 +8,6 @@ PASSWORD=$5
 MINION_ID=$6
 MINION_VERSION=$7
 
-TOKEN=$(curl --retry 10 --insecure --request POST \
-  --url "${MASTER_URL}/login" \
-  --header 'content-type: application/json' \
-  --data "{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\", \"eauth\": \"pam\"}" | \
-    python2 -c "import sys, json; print json.load(sys.stdin)['return'][0]['token']")
-
 
 install_minion()
 {
@@ -22,9 +16,13 @@ install_minion()
 
 autosign_minion()
 {
+	TOKEN=$(curl --retry 10 --insecure --request POST \
+	  --url "${MASTER_URL}/login" \
+	  --header 'content-type: application/json' \
+	  --data "{\"username\": \"${USERNAME}\", \"password\": \"${PASSWORD}\", \"eauth\": \"pam\"}" | \
+	    python -c "import sys, json; print json.load(sys.stdin)['return'][0]['token']")
 
-
-	curl --insecure --request POST \
+	curl --retry 10 --insecure --request POST \
 	  --url "${MASTER_URL}/" \
 	  --header 'content-type: application/json' \
 	  --header "x-auth-token: ${TOKEN}" \
@@ -33,6 +31,7 @@ autosign_minion()
 
 if [ "$INSTALL_MINION" = "true" ]
 then
+        sleep 10
 	install_minion
 	sleep 10
 	autosign_minion
