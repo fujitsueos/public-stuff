@@ -12,7 +12,7 @@ $saltRepo = "https://archive.repo.saltproject.io/windows"
 
 if ($installminion -eq $True) {
   $year = $minionversion.Substring(0, 4)
-  If (($minionversion.ToLower() -eq 'latest') -or [int]$year -gt 2019) {
+  If (($minionversion.ToLower() -eq 'latest') -or [int]$year -gt 3000) {
       $saltRepo = "https://repo.saltproject.io/windows"
   }
 
