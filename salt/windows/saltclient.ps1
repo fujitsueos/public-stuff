@@ -126,7 +126,7 @@ class SaltClient{
       if ($exist) {
         return $this.autosignMinion($minionId)
       }
-      Start-Sleep -Seconds 10
+      Start-Sleep -Seconds 5
       $tries++
     }
     return $False
