@@ -31,8 +31,8 @@ autosign_minion()
 
 if [ "$INSTALL_MINION" = "true" ]
 then
-        sleep 5
+        sleep 3
 	install_minion
-	sleep 5
+	sleep 10
 	autosign_minion
 fi
